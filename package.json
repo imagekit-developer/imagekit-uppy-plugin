@@ -2,10 +2,18 @@
   "name": "@imagekit/imagekit-uppy-plugin",
   "version": "1.0.0-beta.0",
   "description": "A plugin for Uppy, which allows you to upload files directly to ImageKit.io media library.",
-  "main": "index.js",
+  "main": "dist/imagekit-uppy-plugin.cjs.js",
+  "module": "dist/imagekit-uppy-plugin.esm.js",
+  "browser": "dist/imagekit-uppy-plugin.umd.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "rollup -c",
+    "dev": "rollup -c -w"
   },
+  "files": [
+    "dist",
+    "src"
+  ],
   "repository": {
     "type": "git",
     "url": "git+https://github.com/imagekit-developer/imagekit-uppy-plugin.git"
@@ -19,5 +27,15 @@
   "dependencies": {
     "@uppy/companion-client": "^1.5.1",
     "@uppy/core": "^1.12.0"
+  },
+  "devDependencies": {
+    "@babel/cli": "^7.10.5",
+    "@babel/core": "^7.10.5",
+    "@babel/preset-env": "^7.10.4",
+    "@rollup/plugin-commonjs": "^14.0.0",
+    "@rollup/plugin-node-resolve": "^8.4.0",
+    "rollup": "^2.22.0",
+    "rollup-plugin-babel": "^4.4.0",
+    "rollup-plugin-terser": "^6.1.0"
   }
 }
