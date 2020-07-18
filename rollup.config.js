@@ -5,24 +5,6 @@ import pkg from './package.json';
 import { terser } from "rollup-plugin-terser";
 
 export default [
-	// browser-friendly UMD build
-	{
-		input: 'src/main.js',
-		output: {
-			name: 'ImageKitUppyPlugin',
-			file: pkg.browser,
-			format: 'umd'
-		},
-		plugins: [
-			babel({
-				extensions: ['.js'],
-			}),
-			resolve(), // so Rollup can load dependencies in node_modules
-            commonjs(), // so Rollup can convert dependencies in node_modules to an ES module
-            terser()
-		]
-	},
-
 	// CommonJS (for Node) and ES module (for bundlers) build.
 	// (We could have three entries in the configuration array
 	// instead of two, but it's quicker to generate multiple
