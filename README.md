@@ -50,6 +50,11 @@ const uppy = Uppy({ debug: true, autoProceed: false })
     })
 ```
 
+The plugin makes an HTTP GET request to `authenticationEndpoint` and expects a JSON response with three fields i.e. `signature`, `token` and `expire`.
+
+Learn [how to implement authenticationEndpoint](https://docs.imagekit.io/api-reference/upload-file-api/client-side-file-upload#how-to-implement-authenticationendpoint-endpoint) on your server using ImageKit.io server-side SDKs.
+
+# Modify file name, destination path or add tags during upload
 By default, this plugin will send all properties of file meta object as string values with the upload requests. You can control which properties to send as part of the upload request using metaFields field while initializing the ImageKit Uppy plugin. Ideally, you should only allow the supported [upload request parameters](https://docs.imagekit.io/api-reference/upload-file-api/client-side-file-upload#request-structure-multipart-form-data) to avoid any surprises.
 
 ```javascript
@@ -57,6 +62,14 @@ const uppy = Uppy({ debug: true, autoProceed: false })
     .use(Dashboard, {
         inline: true,
         trigger: '#uppyDashboard', // your element
+        metaFields : [
+            {
+                id: 'name', name: 'File name', placeholder: 'Enter the file name'
+            },
+            {
+                id: 'folder', name: 'Folder path', placeholder: 'The destination path e.g. /website-assets'
+            }
+        ]
     })
     .use(ImageKitUppyPlugin, {
         id: 'ImageKit',
