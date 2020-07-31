@@ -17,7 +17,7 @@ You can see a hosted demo of using this plugin in a real project [here](https://
 
 
 # Minimal setup
-The plugin is published on npm. First, you need install it using npm or yarn.
+The plugin is published on npm. First, you need to install it using npm or yarn.
 
 ### Using yarn
 ```
