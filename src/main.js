@@ -334,7 +334,6 @@ class ImageKitUppyPlugin extends Plugin {
             this.uppy.log(`uploading ${current} of ${total}`);
             var formData = new FormData();
             const metaFields = Object.keys(file.meta);
-            debugger;
             metaFields.map(key => {
                 if (key === "name") {
                     formData.append("fileName", file.meta.name.toString());
@@ -395,4 +394,4 @@ class ImageKitUppyPlugin extends Plugin {
     }
 }
 
-module.exports = ImageKitUppyPlugin
+export default ImageKitUppyPlugin
