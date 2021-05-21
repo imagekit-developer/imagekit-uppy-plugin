@@ -37,7 +37,7 @@ class ImageKitUppyPlugin extends Plugin {
         this.type = 'uploader'
         this.title = 'ImageKit.io'
         this.handleUpload = this.handleUpload.bind(this);
-        this.uploadEndpoint = "https://upload.imagekit.io/api/v1/files/upload";
+        this.uploadEndpoint = opts.uploadEndpoint || "https://upload.imagekit.io/api/v1/files/upload";
 
         if (!opts.authenticationEndpoint) {
             throw new Error('authenticationEndpoint is missing')
