@@ -123,7 +123,13 @@ class ImageKitUppyPlugin extends Plugin {
         return new Promise((resolve, reject) => {
             var xhr = new XMLHttpRequest();
             xhr.timeout = 60000;
-            xhr.open('GET', this.opts.authenticationEndpoint);
+            var url = this.opts.authenticationEndpoint;
+            if (url.indexOf("?") === -1) {
+                url += `?t=${Math.random().toString()}`;
+            } else {
+                url += `&t=${Math.random().toString()}`;
+            }
+            xhr.open('GET', url);
             xhr.ontimeout = function (e) {
                 reject(["The authenticationEndpoint you provided timed out in 60 seconds", xhr]);
             };

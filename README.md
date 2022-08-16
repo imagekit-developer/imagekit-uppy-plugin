@@ -50,7 +50,7 @@ const uppy = Uppy({ debug: true, autoProceed: false })
     })
 ```
 
-The plugin makes an HTTP GET request to `authenticationEndpoint` and expects a JSON response with three fields i.e. `signature`, `token` and `expire`.
+The plugin makes an HTTP GET request to `authenticationEndpoint` and expects a JSON response with three fields i.e. `signature`, `token` and `expire`. In addition, the plugin adds a query parameter t with a random value to ensure that the request URL is unique and the response is not cached in Safari iOS. Your backend can ignore this query parameter.
 
 Learn [how to implement authenticationEndpoint](https://docs.imagekit.io/api-reference/upload-file-api/client-side-file-upload#how-to-implement-authenticationendpoint-endpoint) on your server using ImageKit.io server-side SDKs.
 
