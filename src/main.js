@@ -112,7 +112,19 @@ class ImageKitUppyPlugin extends Plugin {
             if (file.error) {
                 return Promise.reject(new Error(file.error))
             } else {
-                return this.upload(file, current, total)
+                return new Promise((resolve, reject)=>{
+                    const queuedRequest = this.requests.run(()=>{
+                        this.upload(file, current, total)
+                        .then((res)=>{
+                            queuedRequest.done()
+                            resolve(res)
+                        })
+                        .catch((err)=>{
+                            queuedRequest.done()
+                            reject(err)
+                        })
+                })
+            })
             }
         })
 
