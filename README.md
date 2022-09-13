@@ -31,8 +31,6 @@ npm install imagekit-uppy-plugin --save
 
 Then include it in your application with mandatory parameters i.e. `id`, `authenticationEndpoint` and `publicKey`.
 
-You can use the `limit` parameter to enable batch requests during upload. By default, there is no limit, and all upload requests are sent simultaneously.
-
 ``` javascript
 import Uppy from '@uppy/core'
 import '@uppy/core/dist/style.css'
@@ -48,8 +46,7 @@ const uppy = Uppy({ debug: true, autoProceed: false })
     .use(ImageKitUppyPlugin, {
         id: 'ImageKit',
         authenticationEndpoint: `http://www.yourserver.com/auth`,
-        publicKey: "your_public_key",
-        limit: 10
+        publicKey: "your_public_key"
     })
 ```
 
@@ -85,7 +82,28 @@ const uppy = Uppy({ debug: true, autoProceed: false })
             "isPrivateFile",
             "customCoordinates",
             "responseFields"
-        ],
+        ]
+    })
+```
+# Batch Support
+You can use the `limit` parameter to enable batch requests during upload. By default, there is no limit, and all upload requests are sent simultaneously.
+
+``` javascript
+import Uppy from '@uppy/core'
+import '@uppy/core/dist/style.css'
+import '@uppy/dashboard/dist/style.css'
+import Dashboard from '@uppy/dashboard'
+import ImageKitUppyPlugin from "imagekit-uppy-plugin"
+
+const uppy = Uppy({ debug: true, autoProceed: false })
+    .use(Dashboard, {
+        inline: true,
+        trigger: '#uppyDashboard', // your element
+    })
+    .use(ImageKitUppyPlugin, {
+        id: 'ImageKit',
+        authenticationEndpoint: `http://www.yourserver.com/auth`,
+        publicKey: "your_public_key",
         limit: 10
     })
 ```
