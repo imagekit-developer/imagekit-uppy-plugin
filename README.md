@@ -85,8 +85,9 @@ const uppy = Uppy({ debug: true, autoProceed: false })
         ]
     })
 ```
-# Batch Support
-You can use the `limit` parameter to enable batch requests during upload. By default, there is no limit, and all upload requests are sent simultaneously.
+# Enable batch upload
+
+You can use the `limit` parameter to enable batch processing during upload. By default, there is no limit, and all upload requests are sent simultaneously.
 
 ``` javascript
 import Uppy from '@uppy/core'
