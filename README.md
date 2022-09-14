@@ -85,6 +85,31 @@ const uppy = Uppy({ debug: true, autoProceed: false })
         ]
     })
 ```
+# Enable batch upload
+
+You can use the `limit` parameter to enable batch processing and set the batch size for upload. By default, all upload requests are sent simultaneously. 
+
+In the following example, the selected files would be uploaded in batches, with each batch having a maximum of 10 files.
+
+``` javascript
+import Uppy from '@uppy/core'
+import '@uppy/core/dist/style.css'
+import '@uppy/dashboard/dist/style.css'
+import Dashboard from '@uppy/dashboard'
+import ImageKitUppyPlugin from "imagekit-uppy-plugin"
+
+const uppy = Uppy({ debug: true, autoProceed: false })
+    .use(Dashboard, {
+        inline: true,
+        trigger: '#uppyDashboard', // your element
+    })
+    .use(ImageKitUppyPlugin, {
+        id: 'ImageKit',
+        authenticationEndpoint: `http://www.yourserver.com/auth`,
+        publicKey: "your_public_key",
+        limit: 10
+    })
+```
 
 # Support
 If something doesn't work as expected, please reach out to us at support@imagekit.io or create an issue in this repo. Please try to include a reproducible code sample.
