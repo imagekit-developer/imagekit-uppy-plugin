@@ -367,7 +367,7 @@ class ImageKitUppyPlugin extends Plugin {
                     formData.append(key, value.toString()); // Always pass value as string
                 }
             });
-            if (!formData.get("fileName")) {
+            if (!formData.get("fileName") || !formData.get("fileName").trim()) {
                 formData.append("fileName", file.name);
             }
             formData.append("publicKey", this.opts.publicKey);
