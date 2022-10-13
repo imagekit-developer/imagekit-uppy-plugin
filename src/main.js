@@ -368,7 +368,7 @@ class ImageKitUppyPlugin extends Plugin {
                 }
             });
             if (!formData.get("fileName") || !formData.get("fileName").trim()) {
-                formData.append("fileName", file.name);
+                formData.set("fileName", file.name);
             }
             formData.append("publicKey", this.opts.publicKey);
             formData.append("file", file.data);
