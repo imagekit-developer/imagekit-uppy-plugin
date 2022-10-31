@@ -372,7 +372,10 @@ class ImageKitUppyPlugin extends Plugin {
             }
             formData.append("publicKey", this.opts.publicKey);
             formData.append("file", file.data);
-
+            if(this.opts.createdBy)
+            {
+                formData.append("createdBy", this.opts.createdBy);   
+            }
             this._generateSignatureToken()
                 .then(({ signature, token, expire }) => {
                     formData.append("signature", signature);
