@@ -372,10 +372,27 @@ class ImageKitUppyPlugin extends Plugin {
             }
             formData.append("publicKey", this.opts.publicKey);
             formData.append("file", file.data);
-            if(this.opts.createdBy)
-            {
-                formData.append("createdBy", this.opts.createdBy);   
+            if (this.opts.createdBy) {
+              if (
+                !this.opts.createdBy.userId ||
+                !this.opts.createdBy.userId.trim().length > 0
+              ) {
+                this.uppy.log(
+                  `UserId passed is invalid ${this.opts.createdBy.toString()}`
+                );
+
+                this.uppy.emit(
+                  "upload-error",
+                  file,
+                  buildResponseError(
+                    `UserId passed is invalid ${this.opts.createdBy.toString()}`
+                  )
+                );
+                return reject(file);
+              }
+              formData.append("createdBy", JSON.stringify(this.opts.createdBy));
             }
+
             this._generateSignatureToken()
                 .then(({ signature, token, expire }) => {
                     formData.append("signature", signature);
