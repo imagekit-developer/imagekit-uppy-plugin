@@ -378,14 +378,14 @@ class ImageKitUppyPlugin extends Plugin {
                 !this.opts.createdBy.userId.trim().length > 0
               ) {
                 this.uppy.log(
-                  `UserId passed is invalid ${this.opts.createdBy.toString()}`
+                  `Missing or invalid userId`
                 );
 
                 this.uppy.emit(
                   "upload-error",
                   file,
                   buildResponseError(
-                    `UserId passed is invalid ${this.opts.createdBy.toString()}`
+                    `Missing or invalid userId`
                   )
                 );
                 return reject(file);
