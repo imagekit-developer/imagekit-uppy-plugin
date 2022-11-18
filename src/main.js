@@ -375,7 +375,7 @@ class ImageKitUppyPlugin extends Plugin {
             if (this.opts.createdBy) {
               if (
                 !this.opts.createdBy.userId ||
-                !this.opts.createdBy.userId.trim().length > 0
+                this.opts.createdBy.userId.trim().length <= 0
               ) {
                 this.uppy.log(
                   `Missing or invalid userId`
