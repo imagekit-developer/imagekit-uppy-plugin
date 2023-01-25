@@ -201,7 +201,7 @@ class ImageKitUppyPlugin extends Plugin {
                     }
                 }
             });
-            xhr.send(reqPayload);
+            xhr.send(JSON.stringify(reqPayload));
         });
     }
 
