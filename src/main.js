@@ -170,6 +170,41 @@ class ImageKitUppyPlugin extends Plugin {
         });
     }
 
+    _getJWT(reqPayload) {
+        return new Promise((resolve, reject) => {
+            const xhr = new XMLHttpRequest();
+            xhr.timeout = 60000;
+            const url = this.opts.authenticationEndpoint;
+            xhr.open('POST', url);
+            xhr.setRequestHeader("csrf-token", this.opts.csrfToken);
+            xhr.setRequestHeader("Content-type", "application/json");
+            xhr.ontimeout = function (e) {
+                reject(["The authenticationEndpoint you provided timed out in 60 seconds", xhr]);
+            };
+            xhr.addEventListener("load", () => {
+                if (xhr.status === 200) {
+                    try {
+                        const body = JSON.parse(xhr.responseText);
+                        const obj = {
+                            token: body.token,
+                        }
+                        resolve(obj);
+                    } catch (ex) {
+                        reject([ex, xhr]);
+                    }
+                } else {
+                    try {
+                        const error = JSON.parse(xhr.responseText);
+                        reject([error, xhr]);
+                    } catch (ex) {
+                        reject([ex, xhr]);
+                    }
+                }
+            });
+            xhr.send(JSON.stringify(reqPayload));
+        });
+    }
+
     _uploadDirectly(formData, file, timeout) {
         return new Promise((resolve, reject) => {
             var uploadFileXHR = new XMLHttpRequest();
@@ -350,10 +385,16 @@ class ImageKitUppyPlugin extends Plugin {
         return new Promise((resolve, reject) => {
             this.uppy.log(`uploading ${current} of ${total}`);
             var formData = new FormData();
+            const reqPayload = {
+                publicKey: this.opts.publicKey,
+                expire: 3600,
+                uploadPayload: {},
+            }
             const metaFields = Object.keys(file.meta);
             metaFields.map(key => {
                 if (key === "name") {
                     formData.append("fileName", file.meta.name.toString());
+                    reqPayload.uploadPayload["fileName"] = file.meta.name.toString();
                     return;
                 }
                 if (this.opts.metaFields && this.opts.metaFields.length && this.opts.metaFields.indexOf(key) == -1) {
@@ -365,12 +406,13 @@ class ImageKitUppyPlugin extends Plugin {
                         value = value.join(",")
                     }
                     formData.append(key, value.toString()); // Always pass value as string
+                    reqPayload.uploadPayload[key] = value.toString();
                 }
             });
             if (!formData.get("fileName") || !formData.get("fileName").trim()) {
                 formData.set("fileName", file.name);
+                reqPayload.uploadPayload["fileName"] = file.name;
             }
-            formData.append("publicKey", this.opts.publicKey);
             formData.append("file", file.data);
             if (this.opts.createdBy) {
               if (
@@ -393,8 +435,34 @@ class ImageKitUppyPlugin extends Plugin {
               formData.append("createdBy", JSON.stringify(this.opts.createdBy));
             }
 
-            this._generateSignatureToken()
+            if (this.opts.apiVersion === 'v2-alpha') {
+                this._getJWT(reqPayload)
+                .then(({ token }) => {
+                    formData.append("token", token);
+                    if (file.remote) {
+                        return this._uploadRemote(formData, file, this.opts.timeout)
+                    } else {
+                        return this._uploadDirectly(formData, file, this.opts.timeout)
+                    }
+                })
+                .then(uploadResponse => {
+                    this.uppy.emit('upload-success', file, {
+                        status: 200,
+                        body: uploadResponse,
+                        uploadURL: uploadResponse.url
+                    })
+                    return resolve(file);
+                })
+                .catch((data) => {
+                    var error = data[0];
+                    var xhr = data[1];
+                    this.uppy.emit('upload-error', file, buildResponseError(error, xhr));
+                    reject(file);
+                })
+            } else {
+                this._generateSignatureToken()
                 .then(({ signature, token, expire }) => {
+                    formData.append("publicKey", this.opts.publicKey);
                     formData.append("signature", signature);
                     formData.append("expire", expire);
                     formData.append("token", token);
@@ -419,6 +487,7 @@ class ImageKitUppyPlugin extends Plugin {
                     this.uppy.emit('upload-error', file, buildResponseError(error, xhr));
                     reject(file);
                 })
+            }
         });
     }
 
