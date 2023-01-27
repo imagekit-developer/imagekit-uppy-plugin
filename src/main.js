@@ -414,6 +414,26 @@ class ImageKitUppyPlugin extends Plugin {
                 reqPayload.uploadPayload["fileName"] = file.name;
             }
             formData.append("file", file.data);
+            if (this.opts.createdBy) {
+              if (
+                !this.opts.createdBy.userId ||
+                this.opts.createdBy.userId.trim().length <= 0
+              ) {
+                this.uppy.log(
+                  `Missing or invalid userId`
+                );
+
+                this.uppy.emit(
+                  "upload-error",
+                  file,
+                  buildResponseError(
+                    `Missing or invalid userId`
+                  )
+                );
+                return reject(file);
+              }
+              formData.append("createdBy", JSON.stringify(this.opts.createdBy));
+            }
 
             if (this.opts.apiVersion === 'v2-alpha') {
                 this._getJWT(reqPayload)
