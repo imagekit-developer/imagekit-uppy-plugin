@@ -176,7 +176,6 @@ class ImageKitUppyPlugin extends Plugin {
             xhr.timeout = 60000;
             const url = this.opts.authenticationEndpoint;
             xhr.open('POST', url);
-            xhr.setRequestHeader("csrf-token", this.opts.csrfToken);
             xhr.setRequestHeader("Content-type", "application/json");
             xhr.ontimeout = function (e) {
                 reject(["The authenticationEndpoint you provided timed out in 60 seconds", xhr]);
