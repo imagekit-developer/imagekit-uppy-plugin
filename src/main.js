@@ -208,7 +208,6 @@ class ImageKitUppyPlugin extends BasePlugin {
     _uploadDirectly(formData, file, timeout) {
         return new Promise((resolve, reject) => {
             var uploadFileXHR = new XMLHttpRequest();
-            this.uppy.emit('upload-started', file);
             this.uploaderEvents[file.id] = new EventManager(this.uppy)
 
             const timer = new ProgressTimeout(timeout, () => {
@@ -294,8 +293,6 @@ class ImageKitUppyPlugin extends BasePlugin {
         }
         delete formData.file;
         return new Promise((resolve, reject) => {
-            this.uppy.emit('upload-start', file)
-
             const Client = file.remote.providerOptions.provider ? Provider : RequestClient
             const client = new Client(this.uppy, file.remote.providerOptions)
             client.post(file.remote.url, {
