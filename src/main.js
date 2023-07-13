@@ -9,7 +9,6 @@ import EventTracker from '@uppy/utils/lib/EventTracker'
 import NetworkError from '@uppy/utils/lib/NetworkError'
 import { RateLimitedQueue } from '@uppy/utils/lib/RateLimitedQueue'
 import isNetworkError from '@uppy/utils/lib/isNetworkError'
-import { filterNonFailedFiles, filterFilesToEmitUploadStarted } from '@uppy/utils/lib/fileFilters'
 
 function buildResponseError(error, xhr) {
     // No error message
@@ -102,10 +101,8 @@ class ImageKitUppyPlugin extends BasePlugin {
 
         this.uppy.log('[ImageKit] Uploading...')
         const files = fileIDs.map((fileID) => this.uppy.getFile(fileID))
-        const filesFiltered = filterNonFailedFiles(files)
-        const filesToEmit = filterFilesToEmitUploadStarted(filesFiltered)
-        this.uppy.emit('upload-start', filesToEmit)
-        return this.uploadFiles(filesFiltered).then(() => null)
+        this.uppy.emit('upload-start', files)
+        return this.uploadFiles(files).then(() => null)
     }
 
     uploadFiles(files) {
