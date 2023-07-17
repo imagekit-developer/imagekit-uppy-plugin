@@ -1,12 +1,13 @@
-import { Plugin } from '@uppy/core'
+import { BasePlugin } from '@uppy/core'
 import settle from '@uppy/utils/lib/settle'
 import { Provider, RequestClient, Socket } from '@uppy/companion-client'
 import emitSocketProgress from '@uppy/utils/lib/emitSocketProgress'
 import getSocketHost from '@uppy/utils/lib/getSocketHost'
 import ProgressTimeout from '@uppy/utils/lib/ProgressTimeout'
+import EventManager from '@uppy/utils/lib/EventManager'
 import EventTracker from '@uppy/utils/lib/EventTracker'
 import NetworkError from '@uppy/utils/lib/NetworkError'
-import RateLimitedQueue from '@uppy/utils/lib/RateLimitedQueue'
+import { RateLimitedQueue } from '@uppy/utils/lib/RateLimitedQueue'
 import isNetworkError from '@uppy/utils/lib/isNetworkError'
 
 function buildResponseError(error, xhr) {
@@ -30,7 +31,7 @@ function buildResponseError(error, xhr) {
     return error
 }
 
-class ImageKitUppyPlugin extends Plugin {
+class ImageKitUppyPlugin extends BasePlugin {
     constructor(uppy, opts) {
         super(uppy, opts)
         this.id = opts.id || 'ImageKit'
@@ -100,7 +101,7 @@ class ImageKitUppyPlugin extends Plugin {
 
         this.uppy.log('[ImageKit] Uploading...')
         const files = fileIDs.map((fileID) => this.uppy.getFile(fileID))
-
+        this.uppy.emit('upload-start', files)
         return this.uploadFiles(files).then(() => null)
     }
 
@@ -207,8 +208,7 @@ class ImageKitUppyPlugin extends Plugin {
     _uploadDirectly(formData, file, timeout) {
         return new Promise((resolve, reject) => {
             var uploadFileXHR = new XMLHttpRequest();
-            this.uppy.emit('upload-started', file);
-            this.uploaderEvents[file.id] = new EventTracker(this.uppy)
+            this.uploaderEvents[file.id] = new EventManager(this.uppy)
 
             const timer = new ProgressTimeout(timeout, () => {
                 uploadFileXHR.abort();
@@ -293,8 +293,6 @@ class ImageKitUppyPlugin extends Plugin {
         }
         delete formData.file;
         return new Promise((resolve, reject) => {
-            this.uppy.emit('upload-started', file)
-
             const Client = file.remote.providerOptions.provider ? Provider : RequestClient
             const client = new Client(this.uppy, file.remote.providerOptions)
             client.post(file.remote.url, {
