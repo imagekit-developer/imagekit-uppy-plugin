@@ -29,7 +29,7 @@ yarn add imagekit-uppy-plugin
 npm install imagekit-uppy-plugin --save
 ```
 
-Then include it in your application with mandatory parameters i.e. `id`, `authenticationEndpoint` and `publicKey`.
+Then include it in your application with mandatory parameters i.e. `id`, `authenticator` and `publicKey`.
 
 ``` javascript
 import Uppy from '@uppy/core'
@@ -38,6 +38,13 @@ import '@uppy/dashboard/dist/style.css'
 import Dashboard from '@uppy/dashboard'
 import ImageKitUppyPlugin from "imagekit-uppy-plugin"
 
+const authenticator = () => {
+    // must return a promise
+    return new Promise((resolve, reject) => {
+        //code to fetch security parameters for authentication
+    })
+}
+
 const uppy = Uppy({ debug: true, autoProceed: false })
     .use(Dashboard, {
         inline: true,
@@ -45,14 +52,59 @@ const uppy = Uppy({ debug: true, autoProceed: false })
     })
     .use(ImageKitUppyPlugin, {
         id: 'ImageKit',
-        authenticationEndpoint: `http://www.yourserver.com/auth`,
+        authenticator,
         publicKey: "your_public_key"
     })
 ```
 
-The plugin makes an HTTP GET request to `authenticationEndpoint` and expects a JSON response with three fields i.e. `signature`, `token` and `expire`. In addition, the plugin adds a query parameter t with a random value to ensure that the request URL is unique and the response is not cached in Safari iOS. Your backend can ignore this query parameter.
+The plugin utilizes an asynchronous function named `authenticator`, which is intended to be used for retrieving security parameters from your backend. This function is expected to resolve with an object containing three fields: `signature`, `token`, and `expire`.
 
-Learn [how to implement authenticationEndpoint](https://docs.imagekit.io/api-reference/upload-file-api/client-side-file-upload#how-to-implement-authenticationendpoint-endpoint) on your server using ImageKit.io server-side SDKs.
+Example implementation for `authenticator` using `XMLHttpRequest`.
+``` javascript
+const authenticator = () => {
+    return new Promise((resolve, reject) => {
+        var xhr = new XMLHttpRequest();
+        xhr.timeout = 6000 //Modify if required;
+        var url = 'server_endpoint';
+        if (url.indexOf("?") === -1) {
+            url += `?t=${Math.random().toString()}`;
+        } else {
+            url += `&t=${Math.random().toString()}`;
+        }
+        xhr.open('GET', url);
+        xhr.ontimeout = function (e) {
+            reject(["Authentication request timed out in 60 seconds", xhr]);
+        };
+        xhr.addEventListener("load", () => {
+            if (xhr.status === 200) {
+                try {
+                    var body = JSON.parse(xhr.responseText);
+                    var obj = {
+                        signature: body.signature,
+                        expire: body.expire,
+                        token: body.token
+                    }
+                    resolve(obj);
+                } catch (ex) {
+                    reject([ex, xhr]);
+                }
+            } else {
+                try {
+                    var error = JSON.parse(xhr.responseText);
+                    reject([error, xhr]);
+                } catch (ex) {
+                    reject([ex, xhr]);
+                }
+            }
+        });
+        xhr.send();
+    })
+}
+```
+
+*Note*: Avoid generating security parameters on the client side. Always send a request to your backend to retrieve security parameters, as the generation of these parameters necessitates the use of your Imagekit `privateKey`, which must not be included in client-side code. 
+
+Learn [how to generate security parameters](https://docs.imagekit.io/api-reference/upload-file-api/client-side-file-upload#how-to-implement-authenticationendpoint-endpoint) on your server using ImageKit.io server-side SDKs.
 
 # Modify file name, destination path or add tags during upload
 By default, this plugin will send all properties of file meta object as string values with the upload requests. You can control which properties to send as part of the upload request using metaFields field while initializing the ImageKit Uppy plugin. Ideally, you should only allow the supported [upload request parameters](https://docs.imagekit.io/api-reference/upload-file-api/client-side-file-upload#request-structure-multipart-form-data) to avoid any surprises.
@@ -73,7 +125,7 @@ const uppy = Uppy({ debug: true, autoProceed: false })
     })
     .use(ImageKitUppyPlugin, {
         id: 'ImageKit',
-        authenticationEndpoint: `http://www.yourserver.com/auth`,
+        authenticator,
         publicKey: "your_public_key"
         metaFields: [
             "useUniqueFileName",
@@ -105,7 +157,7 @@ const uppy = Uppy({ debug: true, autoProceed: false })
     })
     .use(ImageKitUppyPlugin, {
         id: 'ImageKit',
-        authenticationEndpoint: `http://www.yourserver.com/auth`,
+        authenticator,
         publicKey: "your_public_key",
         limit: 10
     })
