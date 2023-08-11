@@ -39,12 +39,20 @@ class ImageKitUppyPlugin extends Plugin {
         this.handleUpload = this.handleUpload.bind(this);
         this.uploadEndpoint = opts.uploadEndpoint || "https://upload.imagekit.io/api/v1/files/upload";
 
-        if (!opts.authenticationEndpoint) {
-            throw new Error('authenticationEndpoint is missing')
-        }
-
         if (!opts.publicKey) {
             throw new Error('publicKey is missing')
+        }
+
+        if (!opts.authenticator) {
+            throw new Error('The authenticator function is not provided.');
+        }
+
+        if (typeof opts.authenticator !== 'function') {
+            throw new Error('The provided authenticator is not a function.');
+        }
+
+        if (opts.authenticator.length !== 0) {
+            throw new Error('The authenticator function should not accept any parameters. Please provide a parameterless function reference.');
         }
 
         // Simultaneous upload limiting is shared across all uploads with this plugin.
@@ -128,46 +136,6 @@ class ImageKitUppyPlugin extends Plugin {
         })
 
         return settle(promises)
-    }
-
-    _generateSignatureToken() {
-        return new Promise((resolve, reject) => {
-            var xhr = new XMLHttpRequest();
-            xhr.timeout = 60000;
-            var url = this.opts.authenticationEndpoint;
-            if (url.indexOf("?") === -1) {
-                url += `?t=${Math.random().toString()}`;
-            } else {
-                url += `&t=${Math.random().toString()}`;
-            }
-            xhr.open('GET', url);
-            xhr.ontimeout = function (e) {
-                reject(["The authenticationEndpoint you provided timed out in 60 seconds", xhr]);
-            };
-            xhr.addEventListener("load", () => {
-                if (xhr.status === 200) {
-                    try {
-                        var body = JSON.parse(xhr.responseText);
-                        var obj = {
-                            signature: body.signature,
-                            expire: body.expire,
-                            token: body.token
-                        }
-                        resolve(obj);
-                    } catch (ex) {
-                        reject([ex, xhr]);
-                    }
-                } else {
-                    try {
-                        var error = JSON.parse(xhr.responseText);
-                        reject([error, xhr]);
-                    } catch (ex) {
-                        reject([ex, xhr]);
-                    }
-                }
-            });
-            xhr.send();
-        });
     }
 
     _uploadDirectly(formData, file, timeout) {
@@ -373,7 +341,13 @@ class ImageKitUppyPlugin extends Plugin {
             formData.append("publicKey", this.opts.publicKey);
             formData.append("file", file.data);
 
-            this._generateSignatureToken()
+            const authPromise = this.opts.authenticator()
+
+            if (!(authPromise instanceof Promise)) {
+                return this.uppy.emit('upload-error', file, buildResponseError('The authenticator function is expected to return a Promise instance.'));
+            }
+
+            authPromise
                 .then(({ signature, token, expire }) => {
                     formData.append("signature", signature);
                     formData.append("expire", expire);
@@ -394,8 +368,15 @@ class ImageKitUppyPlugin extends Plugin {
                     return resolve(file);
                 })
                 .catch((data) => {
-                    var error = data[0];
-                    var xhr = data[1];
+                    var error, xhr;
+                    if (data instanceof Array) {
+                        error = data[0];
+                        xhr = data[1];
+                    }
+                    else {
+                        error = data
+                    }
+
                     this.uppy.emit('upload-error', file, buildResponseError(error, xhr));
                     reject(file);
                 })
