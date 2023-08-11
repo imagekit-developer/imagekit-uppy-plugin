@@ -1,6 +1,6 @@
 {
   "name": "imagekit-uppy-plugin",
-  "version": "1.0.5",
+  "version": "",
   "description": "A plugin for Uppy, which allows you to upload files directly to ImageKit.io media library.",
   "main": "dist/imagekit-uppy-plugin.cjs.js",
   "module": "dist/imagekit-uppy-plugin.esm.js",

@@ -8,6 +8,12 @@ A plugin for [Uppy](https://github.com/transloadit/uppy), which allows you to up
 
 <img src="/assets/imagekit-uppy-demo.gif">
 
+## Changelog - SDK Version 2.0.0
+### Breaking changes
+**1. Authentication Process Update:**
+* Previously, when using this plugin, we need to pass `authenticationEndpoint` which is used by plugin internally for fetching security parameters i.e `signature`, `token`, and `expire`.
+* In version 2.0.0, we have deprecated the use of the `authenticationEndpoint` parameter. Instead, the plugin now introduces a new parameter named `authenticator`. This parameter expects an asynchronous function that resolves with an object containing the necessary security parameters i.e `signature`, `token`, and `expire`. For implementation guidance please [see](#using-npm). 
+
 # Getting started
 You can see a hosted demo of using this plugin in a real project [here](https://066dn.sse.codesandbox.io) or [fork sample project codesandbox.io](https://codesandbox.io/s/github/imagekit-samples/uppy-uploader).
 
@@ -64,7 +70,7 @@ Example implementation for `authenticator` using `XMLHttpRequest`.
 const authenticator = () => {
     return new Promise((resolve, reject) => {
         var xhr = new XMLHttpRequest();
-        xhr.timeout = 6000 //Modify if required;
+        xhr.timeout = 6000; //modify if required
         var url = 'server_endpoint';
         if (url.indexOf("?") === -1) {
             url += `?t=${Math.random().toString()}`;
