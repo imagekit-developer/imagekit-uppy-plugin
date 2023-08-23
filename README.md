@@ -11,8 +11,8 @@ A plugin for [Uppy](https://github.com/transloadit/uppy), which allows you to up
 ## Changelog - SDK Version 2.0.0
 ### Breaking changes
 **1. Authentication Process Update:**
-* Previously, when using this plugin, we need to pass `authenticationEndpoint` which is used by plugin internally for fetching security parameters i.e `signature`, `token`, and `expire`.
-* In version 2.0.0, we have deprecated the use of the `authenticationEndpoint` parameter. Instead, the plugin now introduces a new parameter named `authenticator`. This parameter expects an asynchronous function that resolves with an object containing the necessary security parameters i.e `signature`, `token`, and `expire`. For implementation guidance please [see](#using-npm). 
+* Previously, when using this plugin, we needed to pass `authenticationEndpoint`, which is used by the plugin internally for fetching security parameters, i.e.,`signature`, `token`, and `expire`.
+* In version 2.0.0, we have removed the use of the `authenticationEndpoint` parameter. Instead, the plugin now introduces a new parameter named `authenticator`. This parameter expects an asynchronous function that resolves with an object containing the necessary security parameters, i.e.,`signature`, `token`, and `expire`. For implementation guidance, please [see](#using-npm).
 
 # Getting started
 You can see a hosted demo of using this plugin in a real project [here](https://066dn.sse.codesandbox.io) or [fork sample project codesandbox.io](https://codesandbox.io/s/github/imagekit-samples/uppy-uploader).
@@ -35,7 +35,7 @@ yarn add imagekit-uppy-plugin
 npm install imagekit-uppy-plugin --save
 ```
 
-Then include it in your application with mandatory parameters i.e. `id`, `authenticator` and `publicKey`.
+Then include it in your application with mandatory parameters, i.e., `id`, `authenticator`, and `publicKey`.
 
 ``` javascript
 import Uppy from '@uppy/core'
@@ -63,7 +63,7 @@ const uppy = Uppy({ debug: true, autoProceed: false })
     })
 ```
 
-The plugin utilizes an asynchronous function named `authenticator`, which is intended to be used for retrieving security parameters from your backend. This function is expected to resolve with an object containing three fields: `signature`, `token`, and `expire`.
+The plugin utilises an asynchronous function named `authenticator`, which is intended to be used for retrieving security parameters from your backend. This function is expected to resolve an object containing three fields:`signature`, `token`, and `expire`.
 
 Example implementation for `authenticator` using `XMLHttpRequest`.
 ``` javascript
