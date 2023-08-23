@@ -44,12 +44,16 @@ import '@uppy/dashboard/dist/style.css'
 import Dashboard from '@uppy/dashboard'
 import ImageKitUppyPlugin from "imagekit-uppy-plugin"
 
-const authenticator = () => {
-    // must return a promise
-    return new Promise((resolve, reject) => {
-        //code to fetch security parameters for authentication
-    })
-}
+const authenticator = async () => {
+    try {
+        // Code to fetch security parameters for authentication asynchronously
+        // Complete implementation is shown below
+        const securityParameters = await fetchSecurityParameters();
+        return securityParameters; // Return the fetched parameters { signature, token, expire }
+    } catch (error) {
+        throw new Error("Authentication request failed: " + error.message); // Throw an error if authentication fails
+    }
+};
 
 const uppy = Uppy({ debug: true, autoProceed: false })
     .use(Dashboard, {
@@ -65,47 +69,33 @@ const uppy = Uppy({ debug: true, autoProceed: false })
 
 The plugin utilises an asynchronous function named `authenticator`, which is intended to be used for retrieving security parameters from your backend. This function is expected to resolve an object containing three fields:`signature`, `token`, and `expire`.
 
-Example implementation for `authenticator` using `XMLHttpRequest`.
+#### Example implementation for `authenticator` using `Fetch API`
 ``` javascript
-const authenticator = () => {
-    return new Promise((resolve, reject) => {
-        var xhr = new XMLHttpRequest();
-        xhr.timeout = 6000; //modify if required
-        var url = 'server_endpoint';
-        if (url.indexOf("?") === -1) {
-            url += `?t=${Math.random().toString()}`;
-        } else {
-            url += `&t=${Math.random().toString()}`;
-        }
-        xhr.open('GET', url);
-        xhr.ontimeout = function (e) {
-            reject(["Authentication request timed out in 60 seconds", xhr]);
+const authenticator = async () => {
+    try {
+
+        // You can pass headers as well and later validate the request source in the backend, or you can use headers for any other use case.
+        const headers = {
+          'Authorization': 'Bearer your-access-token',
+          'CustomHeader': 'CustomValue'
         };
-        xhr.addEventListener("load", () => {
-            if (xhr.status === 200) {
-                try {
-                    var body = JSON.parse(xhr.responseText);
-                    var obj = {
-                        signature: body.signature,
-                        expire: body.expire,
-                        token: body.token
-                    }
-                    resolve(obj);
-                } catch (ex) {
-                    reject([ex, xhr]);
-                }
-            } else {
-                try {
-                    var error = JSON.parse(xhr.responseText);
-                    reject([error, xhr]);
-                } catch (ex) {
-                    reject([ex, xhr]);
-                }
-            }
+
+        const response = await fetch('server_endpoint', {
+            headers
         });
-        xhr.send();
-    })
-}
+        
+        if (!response.ok) {
+            const errorText = await response.text();
+            throw new Error(`Request failed with status ${response.status}: ${errorText}`);
+        }
+
+        const data = await response.json();
+        const { signature, expire, token } = data;
+        return { signature, expire, token };
+    } catch (error) {
+        throw new Error(`Authentication request failed: ${error.message}`);
+    }
+};
 ```
 
 *Note*: Avoid generating security parameters on the client side. Always send a request to your backend to retrieve security parameters, as the generation of these parameters necessitates the use of your Imagekit `privateKey`, which must not be included in client-side code. 
