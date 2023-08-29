@@ -1,26 +1,23 @@
-
 # ImageKit.io plugin for Uppy upload widget
 [![npm version](https://img.shields.io/npm/v/imagekit-uppy-plugin)](https://www.npmjs.com/package/imagekit-uppy-plugin)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Twitter Follow](https://img.shields.io/twitter/follow/imagekitio?label=Follow&style=social)](https://twitter.com/ImagekitIo)
 
-A plugin for [Uppy](https://github.com/transloadit/uppy), which allows you to upload files directly to ImageKit.io media library.
+ImageKit plugin for [Uppy](https://github.com/transloadit/uppy) allows you to upload files directly to the ImageKit.io media library.
 
 <img src="/assets/imagekit-uppy-demo.gif">
 
 ## Changelog - SDK Version 2.0.0
 ### Breaking changes
 **1. Authentication Process Update:**
-* Previously, when using this plugin, we needed to pass `authenticationEndpoint`, which is used by the plugin internally for fetching security parameters, i.e.,`signature`, `token`, and `expire`.
-* In version 2.0.0, we have removed the use of the `authenticationEndpoint` parameter. Instead, the plugin now introduces a new parameter named `authenticator`. This parameter expects an asynchronous function that resolves with an object containing the necessary security parameters, i.e.,`signature`, `token`, and `expire`. For implementation guidance, please [see](#using-npm).
+* In version 2.0.0, we have deprecated using the `authenticationEndpoint` parameter. Instead, the SDK now introduces a new parameter named `authenticator`. This parameter expects an asynchronous function that resolves with an object containing the necessary security parameters i.e `signature`, `token`, and `expire`. For implementation guidance, please [see](#using-npm).
 
 # Getting started
 You can see a hosted demo of using this plugin in a real project [here](https://066dn.sse.codesandbox.io) or [fork sample project codesandbox.io](https://codesandbox.io/s/github/imagekit-samples/uppy-uploader).
 
-* [Sample project](https://github.com/imagekit-samples/uppy-uploader) using this plugin with Dropbox, Drive and Facebook upload options.
-* A step by step walkthrough of sample project is available at https://docs.imagekit.io/sample-projects/upload-widget/uppy-upload-widget/.
+* [Sample project](https://github.com/imagekit-samples/uppy-uploader) using this plugin with Dropbox, Drive, and Facebook upload options.
+* A step-by-step walkthrough of the sample project is available at https://docs.imagekit.io/sample-projects/upload-widget/uppy-upload-widget/.
 * ImageKit.io [Upload API](https://docs.imagekit.io/api-reference/upload-file-api/client-side-file-upload) documentation.
-
 
 # Minimal setup
 The plugin is published on npm. First, you need to install it using npm or yarn.
