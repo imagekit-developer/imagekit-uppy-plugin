@@ -8,6 +8,12 @@ A plugin for [Uppy](https://github.com/transloadit/uppy), which allows you to up
 
 <img src="/assets/imagekit-uppy-demo.gif">
 
+## Changelog - SDK Version 2.0.0
+### Breaking changes
+**1. Authentication Process Update:**
+* Previously, when using this plugin, we needed to pass `authenticationEndpoint`, which is used by the plugin internally for fetching security parameters, i.e.,`signature`, `token`, and `expire`.
+* In version 2.0.0, we have removed the use of the `authenticationEndpoint` parameter. Instead, the plugin now introduces a new parameter named `authenticator`. This parameter expects an asynchronous function that resolves with an object containing the necessary security parameters, i.e.,`signature`, `token`, and `expire`. For implementation guidance, please [see](#using-npm).
+
 # Getting started
 You can see a hosted demo of using this plugin in a real project [here](https://066dn.sse.codesandbox.io) or [fork sample project codesandbox.io](https://codesandbox.io/s/github/imagekit-samples/uppy-uploader).
 
@@ -29,7 +35,7 @@ yarn add imagekit-uppy-plugin
 npm install imagekit-uppy-plugin --save
 ```
 
-Then include it in your application with mandatory parameters i.e. `id`, `authenticationEndpoint` and `publicKey`.
+Then include it in your application with mandatory parameters, i.e., `id`, `authenticator`, and `publicKey`.
 
 ``` javascript
 import Uppy from '@uppy/core'
@@ -38,6 +44,17 @@ import '@uppy/dashboard/dist/style.css'
 import Dashboard from '@uppy/dashboard'
 import ImageKitUppyPlugin from "imagekit-uppy-plugin"
 
+const authenticator = async () => {
+    try {
+        // Code to fetch security parameters for authentication asynchronously
+        // Complete implementation is shown below
+        const securityParameters = await fetchSecurityParameters();
+        return securityParameters; // Return the fetched parameters { signature, token, expire }
+    } catch (error) {
+        throw new Error("Authentication request failed: " + error.message); // Throw an error if authentication fails
+    }
+};
+
 const uppy = Uppy({ debug: true, autoProceed: false })
     .use(Dashboard, {
         inline: true,
@@ -45,14 +62,45 @@ const uppy = Uppy({ debug: true, autoProceed: false })
     })
     .use(ImageKitUppyPlugin, {
         id: 'ImageKit',
-        authenticationEndpoint: `http://www.yourserver.com/auth`,
+        authenticator,
         publicKey: "your_public_key"
     })
 ```
 
-The plugin makes an HTTP GET request to `authenticationEndpoint` and expects a JSON response with three fields i.e. `signature`, `token` and `expire`. In addition, the plugin adds a query parameter t with a random value to ensure that the request URL is unique and the response is not cached in Safari iOS. Your backend can ignore this query parameter.
+The plugin utilises an asynchronous function named `authenticator`, which is intended to be used for retrieving security parameters from your backend. This function is expected to resolve an object containing three fields:`signature`, `token`, and `expire`.
 
-Learn [how to implement authenticationEndpoint](https://docs.imagekit.io/api-reference/upload-file-api/client-side-file-upload#how-to-implement-authenticationendpoint-endpoint) on your server using ImageKit.io server-side SDKs.
+#### Example implementation for `authenticator` using `Fetch API`
+``` javascript
+const authenticator = async () => {
+    try {
+
+        // You can pass headers as well and later validate the request source in the backend, or you can use headers for any other use case.
+        const headers = {
+          'Authorization': 'Bearer your-access-token',
+          'CustomHeader': 'CustomValue'
+        };
+
+        const response = await fetch('server_endpoint', {
+            headers
+        });
+        
+        if (!response.ok) {
+            const errorText = await response.text();
+            throw new Error(`Request failed with status ${response.status}: ${errorText}`);
+        }
+
+        const data = await response.json();
+        const { signature, expire, token } = data;
+        return { signature, expire, token };
+    } catch (error) {
+        throw new Error(`Authentication request failed: ${error.message}`);
+    }
+};
+```
+
+*Note*: Avoid generating security parameters on the client side. Always send a request to your backend to retrieve security parameters, as the generation of these parameters necessitates the use of your Imagekit `privateKey`, which must not be included in client-side code. 
+
+Learn [how to generate security parameters](https://docs.imagekit.io/api-reference/upload-file-api/client-side-file-upload#how-to-implement-authenticationendpoint-endpoint) on your server using ImageKit.io server-side SDKs.
 
 # Modify file name, destination path or add tags during upload
 By default, this plugin will send all properties of file meta object as string values with the upload requests. You can control which properties to send as part of the upload request using metaFields field while initializing the ImageKit Uppy plugin. Ideally, you should only allow the supported [upload request parameters](https://docs.imagekit.io/api-reference/upload-file-api/client-side-file-upload#request-structure-multipart-form-data) to avoid any surprises.
@@ -73,7 +121,7 @@ const uppy = Uppy({ debug: true, autoProceed: false })
     })
     .use(ImageKitUppyPlugin, {
         id: 'ImageKit',
-        authenticationEndpoint: `http://www.yourserver.com/auth`,
+        authenticator,
         publicKey: "your_public_key"
         metaFields: [
             "useUniqueFileName",
@@ -105,7 +153,7 @@ const uppy = Uppy({ debug: true, autoProceed: false })
     })
     .use(ImageKitUppyPlugin, {
         id: 'ImageKit',
-        authenticationEndpoint: `http://www.yourserver.com/auth`,
+        authenticator,
         publicKey: "your_public_key",
         limit: 10
     })
