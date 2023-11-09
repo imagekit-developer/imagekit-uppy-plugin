@@ -262,7 +262,6 @@ class ImageKitUppyPlugin extends BasePlugin {
                 if (uploadFileXHR.status === 200 || uploadFileXHR.status === 202) {
                     try {
                         var uploadResponse = JSON.parse(uploadFileXHR.responseText);
-                        console.log(uploadResponse)
                         resolve(uploadResponse);
                     } catch (ex) {
                         reject([ex, uploadFileXHR]);
