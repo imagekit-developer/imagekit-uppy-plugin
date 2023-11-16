@@ -259,7 +259,7 @@ class ImageKitUppyPlugin extends BasePlugin {
                     this.uploaderEvents[file.id] = null
                 }
 
-                if (uploadFileXHR.status === 200) {
+                if (uploadFileXHR.status === 200 || uploadFileXHR.status === 202) {
                     try {
                         var uploadResponse = JSON.parse(uploadFileXHR.responseText);
                         resolve(uploadResponse);
@@ -268,7 +268,7 @@ class ImageKitUppyPlugin extends BasePlugin {
                     }
 
                 }
-                else if (uploadFileXHR.status !== 200) {
+                else if (uploadFileXHR.status !== 200 || uploadFileXHR.status !==202) {
                     try {
                         var error = JSON.parse(uploadFileXHR.responseText);
                         if (error.message) reject([error.message, uploadFileXHR]);
