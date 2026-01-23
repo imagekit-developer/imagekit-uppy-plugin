@@ -16,7 +16,6 @@ ImageKit plugin for [Uppy](https://github.com/transloadit/uppy) allows you to up
 You can see a hosted demo of using this plugin in a real project [here](https://066dn.sse.codesandbox.io) or [fork sample project codesandbox.io](https://codesandbox.io/s/github/imagekit-samples/uppy-uploader).
 
 * [Sample project](https://github.com/imagekit-samples/uppy-uploader) using this plugin with Dropbox, Drive, and Facebook upload options.
-* A step-by-step walkthrough of the sample project is available at https://docs.imagekit.io/sample-projects/upload-widget/uppy-upload-widget/.
 * ImageKit.io [Upload API](https://docs.imagekit.io/api-reference/upload-file-api/client-side-file-upload) documentation.
 
 # Minimal setup
