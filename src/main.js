@@ -247,13 +247,11 @@ class ImageKitUppyPlugin extends Plugin {
 
                 this.onFileRemove(file.id, () => {
                     socket.send('pause', {})
-                    queuedRequest.abort()
                     resolve(`upload ${file.id} was removed`)
                 })
 
                 this.onCancelAll(file.id, () => {
                     socket.send('pause', {})
-                    queuedRequest.abort()
                     resolve(`upload ${file.id} was canceled`)
                 })
 
@@ -270,25 +268,26 @@ class ImageKitUppyPlugin extends Plugin {
                 socket.on('progress', (progressData) => emitSocketProgress(this, progressData, file))
 
                 socket.on('success', (data) => {
-                    var uploadResponse = JSON.parse(data.response.responseText);
+                    const uploadResponse = JSON.parse(data.response.responseText);
 
-                    queuedRequest.done()
                     if (this.uploaderEvents[file.id]) {
                         this.uploaderEvents[file.id].remove()
                         this.uploaderEvents[file.id] = null
                     }
+
+                    socket.close()
                     return resolve(uploadResponse);
                 })
 
                 socket.on('error', (errData) => {
-                    queuedRequest.done()
                     if (this.uploaderEvents[file.id]) {
                         this.uploaderEvents[file.id].remove()
                         this.uploaderEvents[file.id] = null
                     }
+                    socket.close()
 
                     try {
-                        var error = JSON.parse(errData.responseText);
+                        const error = JSON.parse(errData.responseText);
                         if (error.message) {
                             return reject([error.message]);
                         }
@@ -300,14 +299,10 @@ class ImageKitUppyPlugin extends Plugin {
                     }
                 })
 
-                const queuedRequest = this.requests.run(() => {
-                    socket.open()
-                    if (file.isPaused) {
-                        socket.send('pause', {})
-                    }
-
-                    return () => socket.close()
-                })
+                socket.open()
+                if (file.isPaused) {
+                    socket.send('pause', {})
+                }
             }).catch((err) => {
                 reject([err]);
             })
